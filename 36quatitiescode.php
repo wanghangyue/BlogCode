@@ -89,3 +89,29 @@ echo $xml;
   } 
   //一旦连接数据库, 最好设置连接的 characterset. 你的应用如果要支持多语言, 这么做是必须的.
   ?>
+
+  //10、使用 htmlentities 设置正确的编码选项
+  <?php
+  1 $value = htmlentities($this->value , ENT_QUOTES , CHARSET);
+  ?>
+  
+  //11、不要在应用中使用gzip压缩输出, 让apache处理
+  //12. 使用json_encode输出动态javascript内容
+  <?php
+  $images = array( 'myself.png' , 'friends.png' , 'colleagues.png' );  
+  $js_code = '';     
+    foreach($images as $image)  
+    {  
+    $js_code .= "'$image' ,";  
+    }    
+    $js_code = 'var images = [' . $js_code . ']; ';     
+    echo $js_code;  
+    //Output is var images = ['myself.png' ,'friends.png' ,'colleagues.png' ,]; 
+  ?>
+  //使用json_encode
+  <?php
+  $images = array( 'myself.png' , 'friends.png' , 'colleagues.png' );      
+  $js_code = 'var images = ' . json_encode($images);     
+  echo $js_code;     
+  //Output is : var images = ["myself.png","friends.png","colleagues.png"] 
+  ?>
