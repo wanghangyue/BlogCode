@@ -115,3 +115,28 @@ echo $xml;
   echo $js_code;     
   //Output is : var images = ["myself.png","friends.png","colleagues.png"] 
   ?>
+  //13,合并数组，二维数组中把每个数组的第一个相同的数量累加
+  <?php
+
+/**
+   * 数组合并
+   * Enter description here ...
+   * @param unknown_type $array_info
+   */
+  public function array_array($array_info)
+  {
+    $result = array();
+    foreach($array_info as $key => $value) {
+      if(array_key_exists($value[0],$result)) {
+        $result[$value[0]]=$value[1] + $result[$value[0]];
+      } else {
+        $result[$value[0]]=$value[1];
+      }
+    }
+    foreach($result as $key => $value) {
+      $result1[] = array($key,$value);
+    }
+    return $result1;
+  }
+
+?>
