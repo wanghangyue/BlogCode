@@ -113,5 +113,98 @@ echo $xml;
   $images = array( 'myself.png' , 'friends.png' , 'colleagues.png' );      
   $js_code = 'var images = ' . json_encode($images);     
   echo $js_code;     
-  //Output is : var images = ["myself.png","friends.png","colleagues.png"] 
+  //Output is : var images = ["myself.png","friends.png","colleagues.png"]
   ?>
+  //13.写或保存文件前, 确保目录是可写的, 假如不可写, 输出错误信息. 这会节约你很多调试时间. linux系统中, 需要处理权限, 目录权限不当会导致很多很多的问题, 文件也有可能无法读取等等.确保你的应用足够智能, 输出某些重要信息.
+  <?php
+  $contents = "All the content";  
+  $file_path = "/var/www/project/content.txt";     
+  file_put_contents($file_path , $contents); 
+  ?>
+  //这大体上正确. 但有些间接的问题. file_put_contents 可能会由于几个原因失败:父目录不存在，目录存在, 但不可写，文件被写锁住。所以写文件前做明确的检查更好.
+  <?php
+  $contents = "All the content";  
+  $dir = '/var/www/project';  
+  $file_path = $dir . "/content.txt";  
+     
+  if(is_writable($dir))  
+  {  
+      file_put_contents($file_path , $contents);  
+  }  
+  else  
+  {  
+      die("Directory $dir is not writable, or does not exist. Please check");  
+  } 
+  ?>
+  //14.在 linux环境中, 权限问题可能会浪费你很多时间. 从今往后, 无论何时, 当你创建一些文件后, 确保使用chmod设置正确权限. 否则的话, 可能文件先是由"php"用户创建, 但你用其它的用户登录工作, 系统將会拒绝访问或打开文件, 你不得不奋力获取root权限, 更改文件的权限等等.
+  <?php
+  // Read and write for owner, read for everybody else  
+  chmod("/somedir/somefile", 0644);  
+  // Everything for owner, read and execute for others  
+  chmod("/somedir/somefile", 0755); 
+  ?>
+  //15.不要依赖submit按钮值来检查表单提交行为
+  <?php
+   if($_POST['submit'] == 'Save')  
+   {  
+      //Save the things  
+   } 
+  ?>
+  //上面大多数情况正确, 除了应用是多语言的. 'Save' 可能代表其它含义. 你怎么区分它们呢. 因此, 不要依赖于submit按钮的值.
+  <?php
+  if( $_SERVER['REQUEST_METHOD'] == 'POST' and isset($_POST['submit']) )  
+   {  
+       //Save the things  
+   } 
+  ?>
+  //16. 为函数内总具有相同值的变量定义成静态变量
+  <?php
+  //Delay for some time
+  functiondelay(){
+    $sync_delay= get_option('sync_delay');
+    echo"<br />Delaying for $sync_delay seconds...";
+    sleep($sync_delay);
+    echo"Done <br />";
+  }
+  ?>
+  //用静态变量取代
+  <?php
+  //Delay for some time0
+  functiondelay(){
+    static $sync_delay= null;
+    if($sync_delay== null){
+      $sync_delay= get_option('sync_delay');
+    }
+    echo"<br />Delaying for $sync_delay seconds...";
+    sleep($sync_delay);
+    echo"Done <br />";
+  }
+  ?>
+  //17. 不要直接使用 $_SESSION 变量,某些简单例子:
+  <?php
+  $_SESSION['username'] = $username;  
+  $username = $_SESSION['username'];  
+  ?>
+  //这会导致某些问题. 如果在同个域名中运行了多个应用, session 变量可能会冲突. 两个不同的应用可能使用同一个session key. 例如, 一个前端门户, 和一个后台管理系统使用同一域名.
+  //从现在开始, 使用应用相关的key和一个包装函数:
+  <?php
+  define('APP_ID' , 'abc_corp_ecommerce');       
+  //Function to get a session variable  
+  function session_get($key)  
+  {  
+      $k = APP_ID . '.' . $key;  
+      if(isset($_SESSION[$k]))  
+      {  
+          return $_SESSION[$k];  
+      }   
+      return false;  
+  }   
+  //Function set the session variable  
+  function session_set($key , $value)  
+  {  
+      $k = APP_ID . '.' . $key;  
+      $_SESSION[$k] = $value;  
+      return true;  
+  } 
+  ?>
+  
