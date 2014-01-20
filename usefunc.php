@@ -44,5 +44,13 @@
   while(list($k,$v) = each($a)){
     echo "$v";
   }
+/**
+  * php输出字符串
+  * 
+  */
+  $str = <<<ok  //ok是一个标记
+  hello world 
+  ok
+  echo $str;
   
 ?>       
